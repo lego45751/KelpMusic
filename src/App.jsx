@@ -11,7 +11,6 @@ import NowPlaying from "./NowPlaying.jsx";
 import {
   saveSong, getAllSongs, deleteSong, getSongUrl, revokeSongUrl,
 } from "./lib/kelpDB";
-} from "./lib/kelpDB";
 const PLAYLISTS_KEY = "kelp.playlists.v2";
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
