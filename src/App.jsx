@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   Upload, Music, ListMusic, Download, Plus, Play, Pause, ChevronLeft,
-  Search, Wifi, WifiOff, Loader2, CloudDownload,
+  Search, Wifi, WifiOff, Loader2, DownloadCloud,
 } from "lucide-react";
 import toast, { Toaster as HotToaster } from "react-hot-toast";
 import KelpLogo from "./KelpLogo.jsx";
