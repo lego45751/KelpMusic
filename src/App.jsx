@@ -11,6 +11,7 @@ import NowPlaying from "./NowPlaying.jsx";
 import {
   saveSong, getAllSongs, deleteSong, getSongUrl, revokeSongUrl,
 } from "./lib/kelpDB";
+
 const PLAYLISTS_KEY = "kelp.playlists.v2";
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
@@ -59,7 +60,7 @@ export default function Kelp() {
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const [songs, setSongs] = useState([]); // locally stored (offline) tracks
+  const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("search");
 
@@ -67,12 +68,10 @@ export default function Kelp() {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  // connection
   const [online, setOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
 
-  // playback (unified queue holds either stored songs or online tracks)
   const [playQueue, setPlayQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -84,10 +83,8 @@ export default function Kelp() {
   const [repeat, setRepeat] = useState("off");
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
 
-  // downloads
   const [downloading, setDownloading] = useState(new Set());
 
-  // playlists
   const [playlists, setPlaylists] = useState([]);
   const [openPlaylist, setOpenPlaylist] = useState(null);
   const [newPlaylistName, setNewPlaylistName] = useState("");
@@ -102,7 +99,6 @@ export default function Kelp() {
 
   const currentSong = currentIndex >= 0 ? playQueue[currentIndex] : null;
 
-  // ---- initial load ----
   useEffect(() => {
     (async () => {
       const [s, p] = await Promise.all([
@@ -119,7 +115,6 @@ export default function Kelp() {
     localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
   }, [playlists]);
 
-  // ---- online/offline detection ----
   useEffect(() => {
     const goOnline = () => setOnline(true);
     const goOffline = () => {
@@ -136,7 +131,6 @@ export default function Kelp() {
     };
   }, []);
 
-  // ---- online search (debounced) ----
   useEffect(() => {
     if (!online || tab !== "search") return;
     const q = searchQuery.trim();
@@ -170,7 +164,6 @@ export default function Kelp() {
     };
   }, [searchQuery, online, tab]);
 
-  // ---- audio element wiring ----
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
@@ -277,7 +270,6 @@ export default function Kelp() {
     }
   }, [currentSong, playQueue, loadSong]);
 
-  // ---- import local audio ----
   const onImport = async (e) => {
     const files = Array.from(e.target.files || []);
     e.target.value = "";
@@ -314,7 +306,6 @@ export default function Kelp() {
     }
   };
 
-  // ---- download online track for offline ----
   const downloadTrack = async (track) => {
     if (downloading.has(track.id) || songsById.has(track.id)) return;
     setDownloading((prev) => new Set(prev).add(track.id));
@@ -344,7 +335,6 @@ export default function Kelp() {
     }
   };
 
-  // ---- playlists ----
   const createPlaylist = () => {
     const name = newPlaylistName.trim();
     if (!name) return;
@@ -377,7 +367,6 @@ export default function Kelp() {
   const cycleRepeat = () =>
     setRepeat((r) => (r === "off" ? "all" : r === "all" ? "one" : "off"));
 
-  // ---- derived lists ----
   const downloadsList = useMemo(() => {
     if (!searchQuery.trim()) return songs;
     const q = searchQuery.toLowerCase();
@@ -393,9 +382,10 @@ export default function Kelp() {
     return songs.filter((s) => pl?.songIds?.includes(s.id));
   }, [openPlaylist, playlists, songs]);
 
+  // Fixed CloudDownload -> DownloadCloud reference
   const tabs = [
     { id: "search", label: "Search", icon: Search },
-    { id: "downloads", label: "Downloads", icon: CloudDownload },
+    { id: "downloads", label: "Downloads", icon: DownloadCloud },
     { id: "playlists", label: "Playlists", icon: ListMusic },
   ];
 
@@ -407,7 +397,6 @@ export default function Kelp() {
       </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-5 pb-40 pt-7">
-        {/* header */}
         <header className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <KelpLogo className="h-11 w-11 drop-shadow-[0_0_12px_rgba(34,197,94,0.4)]" />
@@ -437,7 +426,6 @@ export default function Kelp() {
           </span>
         </header>
 
-        {/* search bar */}
         <div className="relative mb-4">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <input
@@ -449,7 +437,6 @@ export default function Kelp() {
           />
         </div>
 
-        {/* tabs */}
         <div className="mb-4 flex gap-1 rounded-2xl border border-slate-700/50 bg-[#1e293b] p-1">
           {tabs.map((t) => {
             const Icon = t.icon;
@@ -473,7 +460,6 @@ export default function Kelp() {
           })}
         </div>
 
-        {/* import button */}
         <input
           ref={fileInputRef}
           type="file"
@@ -490,7 +476,6 @@ export default function Kelp() {
           Import Local Audio
         </button>
 
-        {/* content */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400" />
@@ -555,6 +540,7 @@ export default function Kelp() {
                   isPlaying={isPlaying}
                   onPlay={() => playFromList(downloadsList, i)}
                   onAddToPlaylist={setAddTarget}
+                  onDelete={removeSong}
                 />
               ))
             )}
@@ -585,6 +571,7 @@ export default function Kelp() {
                   isPlaying={isPlaying}
                   onPlay={() => playFromList(playlistSongs, i)}
                   onAddToPlaylist={setAddTarget}
+                  onDelete={removeSong}
                 />
               ))
             )}
@@ -638,11 +625,10 @@ export default function Kelp() {
         )}
       </div>
 
-      {/* mini player */}
       {currentSong && !nowPlayingOpen && (
         <button
           onClick={() => setNowPlayingOpen(true)}
-          className="fixed bottom-0 left-1/2 z-30 flex w-full max-w-md items-center gap-3 border-t border-slate-700/60 bg-[#1e293b]/95 px-4 py-3 backdrop-blur"
+          className="fixed bottom-0 left-1/2 z-30 flex w-full max-w-md -translate-x-1/2 items-center gap-3 border-t border-slate-700/60 bg-[#1e293b]/95 px-4 py-3 backdrop-blur"
         >
           {currentSong.albumArt ? (
             <img
@@ -669,12 +655,11 @@ export default function Kelp() {
         </button>
       )}
 
-      {/* add-to-playlist sheet */}
       {addTarget && (
         <div className="fixed inset-0 z-50 flex items-end" onClick={() => setAddTarget(null)}>
           <div className="absolute inset-0 bg-black/60" />
           <div
-            className="relative w-full max-w-md rounded-t-3xl border-t border-slate-700/60 bg-[#1e293b] p-5"
+            className="relative w-full max-w-md mx-auto rounded-t-3xl border-t border-slate-700/60 bg-[#1e293b] p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-600" />
@@ -722,7 +707,6 @@ export default function Kelp() {
         </div>
       )}
 
-      {/* hidden audio element */}
       <audio
         ref={audioRef}
         onTimeUpdate={(e) => setProgress(e.target.currentTime)}
@@ -732,30 +716,32 @@ export default function Kelp() {
         onPlay={() => setIsPlaying(true)}
       />
 
-      <NowPlaying
-        song={currentSong}
-        isPlaying={isPlaying}
-        progress={progress}
-        duration={duration}
-        volume={volume}
-        muted={muted}
-        shuffle={shuffle}
-        repeat={repeat}
-        onTogglePlay={togglePlay}
-        onNext={() => playNext()}
-        onPrev={playPrev}
-        onSeek={(t) => {
-          if (audioRef.current) {
-            audioRef.current.currentTime = t;
-            setProgress(t);
-          }
-        }}
-        onVolume={(v) => { setVolume(v); setMuted(v === 0); }}
-        onToggleMute={() => setMuted((m) => !m)}
-        onToggleShuffle={() => setShuffle((s) => !s)}
-        onCycleRepeat={cycleRepeat}
-        onClose={() => setNowPlayingOpen(false)}
-      />
+      {nowPlayingOpen && (
+        <NowPlaying
+          song={currentSong}
+          isPlaying={isPlaying}
+          progress={progress}
+          duration={duration}
+          volume={volume}
+          muted={muted}
+          shuffle={shuffle}
+          repeat={repeat}
+          onTogglePlay={togglePlay}
+          onNext={() => playNext()}
+          onPrev={playPrev}
+          onSeek={(t) => {
+            if (audioRef.current) {
+              audioRef.current.currentTime = t;
+              setProgress(t);
+            }
+          }}
+          onVolume={(v) => { setVolume(v); setMuted(v === 0); }}
+          onToggleMute={() => setMuted((m) => !m)}
+          onToggleShuffle={() => setShuffle((s) => !s)}
+          onCycleRepeat={cycleRepeat}
+          onClose={() => setNowPlayingOpen(false)}
+        />
+      )}
 
       <HotToaster
         position="top-center"
