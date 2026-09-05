@@ -8,9 +8,9 @@ import KelpLogo from "./KelpLogo.jsx";
 import SongRow from "./SongRow.jsx";
 import SearchResultRow from "./SearchResultRow.jsx";
 import NowPlaying from "./NowPlaying.jsx";
-import NowPlaying from "./NowPlaying";
 import {
   saveSong, getAllSongs, deleteSong, getSongUrl, revokeSongUrl,
+} from "./lib/kelpDB";
 } from "./lib/kelpDB";
 const PLAYLISTS_KEY = "kelp.playlists.v2";
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
