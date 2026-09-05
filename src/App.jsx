@@ -4,14 +4,13 @@ import {
   Search, Wifi, WifiOff, Loader2, CloudDownload,
 } from "lucide-react";
 import toast, { Toaster as HotToaster } from "react-hot-toast";
-import KelpLogo from "@/components/KelpLogo";
-import SongRow from "@/components/SongRow";
-import SearchResultRow from "@/components/SearchResultRow";
-import NowPlaying from "@/components/NowPlaying";
+import KelpLogo from "./components/KelpLogo";
+import SongRow from "./components/SongRow";
+import SearchResultRow from "./components/SearchResultRow";
+import NowPlaying from "./components/NowPlaying";
 import {
   saveSong, getAllSongs, deleteSong, getSongUrl, revokeSongUrl,
-} from "@/lib/kelpDB";
-
+} from "./lib/kelpDB";
 const PLAYLISTS_KEY = "kelp.playlists.v2";
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
