@@ -4,10 +4,10 @@ import {
   Search, Wifi, WifiOff, Loader2, CloudDownload,
 } from "lucide-react";
 import toast, { Toaster as HotToaster } from "react-hot-toast";
-import KelpLogo from "./components/KelpLogo";
-import SongRow from "./components/SongRow";
-import SearchResultRow from "./components/SearchResultRow";
-import NowPlaying from "./components/NowPlaying";
+import KelpLogo from "./KelpLogo";
+import SongRow from "./SongRow";
+import SearchResultRow from "./SearchResultRow";
+import NowPlaying from "./NowPlaying";
 import {
   saveSong, getAllSongs, deleteSong, getSongUrl, revokeSongUrl,
 } from "./lib/kelpDB";
